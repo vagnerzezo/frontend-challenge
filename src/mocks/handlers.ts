@@ -1,4 +1,4 @@
-import { delay, http, HttpResponse } from 'msw'
+import { http, HttpResponse } from 'msw'
 import type {
   CartItemInput,
   CollectionSlug,
@@ -49,19 +49,6 @@ import { connectionCount, dropConnections, realtimeHandler, replayEvent, resetRe
 
 const API = '/api'
 const ADMIN = '/__mock'
-
-// contadores usados pelos cenários (zerados no reset ou ao trocar de cenário)
-const catalogFailures = new Map<string, number>()
-let catalogRequestCount = 0
-const timedOutKeys = new Set<string>()
-const soldOutNfts = new Set<string>()
-
-export function resetScenarioCounters() {
-  catalogFailures.clear()
-  catalogRequestCount = 0
-  timedOutKeys.clear()
-  soldOutNfts.clear()
-}
 
 function readListParams(url: URL): NftListParams {
   const query = url.searchParams
@@ -201,23 +188,7 @@ export const restHandlers = [
   // NFTs
   http.get(
     `${API}/nfts`,
-    withNetwork(async ({ request }) => {
-      const config = getConfig()
-      // cada busca falha 3 vezes (mais que os retries do cliente) e depois volta a funcionar
-      const failures = catalogFailures.get(request.url) ?? 0
-      if (config.scenario === 'catalog-error' && failures < 3) {
-        catalogFailures.set(request.url, failures + 1)
-        fail(503, 'TRANSIENT', 'Catálogo temporariamente indisponível.')
-      }
-      if (config.scenario === 'out-of-order') {
-        // as requisições mais antigas respondem por último (1.8s, 0.6s, 0.2s, ...)
-        const delays = [1800, 600, 200]
-        const requestNumber = catalogRequestCount
-        catalogRequestCount++
-        await delay(delays[requestNumber % 3])
-      }
-      return HttpResponse.json(listNfts(readListParams(new URL(request.url))))
-    }),
+    withNetwork(({ request }) => HttpResponse.json(listNfts(readListParams(new URL(request.url))))),
   ),
   http.get(
     `${API}/nfts/:id`,
@@ -237,7 +208,6 @@ export const restHandlers = [
     withNetwork(({ request, params }) => {
       const user = requireUser(request)
       const nft = getNft(String(params.nftId))
-      if (getConfig().scenario === 'favorites-error') fail(500, 'INTERNAL', 'Não foi possível salvar o favorito.')
       const list = (db.state.favorites[user.id] ??= [])
       if (!list.includes(nft.id)) list.push(nft.id)
       db.save()
@@ -248,7 +218,6 @@ export const restHandlers = [
     `${API}/favorites/:nftId`,
     withNetwork(({ request, params }) => {
       const user = requireUser(request)
-      if (getConfig().scenario === 'favorites-error') fail(500, 'INTERNAL', 'Não foi possível remover o favorito.')
       db.state.favorites[user.id] = (db.state.favorites[user.id] ?? []).filter((id) => id !== params.nftId)
       db.save()
       return HttpResponse.json({ nftIds: db.state.favorites[user.id] })
@@ -379,7 +348,6 @@ export const restHandlers = [
     withNetwork(async ({ request }) => {
       const user = requireUser(request)
       const body = await readJson<{ walletId?: string; provider: WalletSession['provider']; network: Network; address?: string }>(request)
-      if (getConfig().scenario === 'wallet-reject') fail(403, 'WALLET_REJECTED', 'A conexão foi recusada na carteira.')
       let address = body.address ?? ''
       if (body.walletId) {
         const wallet = db.state.wallets[body.walletId] ?? fail(404, 'NOT_FOUND', 'Carteira não encontrada.')
@@ -445,12 +413,6 @@ export const restHandlers = [
       const quote = db.state.quotes[body.quoteId] ?? fail(409, 'QUOTE_STALE', 'Cotação não encontrada. Revise o pedido.')
       if (quote.ownerKey !== `user:${user.id}`) fail(403, 'FORBIDDEN', 'Cotação pertence a outro usuário.')
 
-      const firstItem = quote.items[0]
-      if (getConfig().scenario === 'sold-out-on-checkout' && !soldOutNfts.has(firstItem.nftId)) {
-        soldOutNfts.add(firstItem.nftId)
-        updateNft(firstItem.nftId, { editions: { [firstItem.editionId]: 0 } })
-      }
-
       // confere de novo preço, estoque, cupom e taxa
       const fresh = buildQuote(
         quote.ownerKey,
@@ -481,12 +443,6 @@ export const restHandlers = [
           label: wallet?.nickname ?? 'Carteira externa',
         },
       })
-
-      if (getConfig().scenario === 'order-timeout' && !timedOutKeys.has(key!)) {
-        // o pedido é criado, mas a resposta só chega depois do timeout do cliente
-        timedOutKeys.add(key!)
-        await delay(15_000)
-      }
       return HttpResponse.json(publicOrder(order), { status: 201 })
     }),
   ),
@@ -573,12 +529,10 @@ export const adminHandlers = [
   ),
   http.put(`${ADMIN}/config`, async ({ request }) => {
     const changes = (await request.json()) as Partial<MockConfig>
-    if (changes.scenario) resetScenarioCounters()
     return HttpResponse.json(setConfig(changes))
   }),
   http.post(`${ADMIN}/reset`, async () => {
     resetDomainTimers()
-    resetScenarioCounters()
     resetRealtime()
     await db.reset()
     return HttpResponse.json({ config: resetConfig() })

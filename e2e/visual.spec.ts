@@ -1,9 +1,9 @@
-import { addToCartFromDetail, expect, login, test, useScenario } from './fixtures'
+import { addToCartFromDetail, expect, login, test, useMockConfig } from './fixtures'
 import type { Page } from '@playwright/test'
 
 /** Regressão visual com dados estáveis (fixtures determinísticas, latência zero). */
 async function stabilize(page: Page) {
-  await page.addStyleTag({ content: '[data-testid=scenario-trigger],[data-sonner-toaster]{display:none!important}' })
+  await page.addStyleTag({ content: '[data-sonner-toaster]{display:none!important}' })
   await page.evaluate(() => document.fonts.ready)
   await page.waitForLoadState('networkidle')
   // rola a página para disparar imagens lazy e aguarda as visíveis carregarem
@@ -18,7 +18,7 @@ async function stabilize(page: Page) {
 }
 
 test.describe('Regressão visual', () => {
-  test.beforeEach(async ({ page }) => useScenario(page))
+  test.beforeEach(async ({ page }) => useMockConfig(page))
 
   test('início', async ({ page }) => {
     await page.goto('/')

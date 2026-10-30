@@ -1,4 +1,4 @@
-import { expect, isMobile, test, useScenario } from './fixtures'
+import { expect, isMobile, test, useMockConfig } from './fixtures'
 import type { Page } from '@playwright/test'
 
 /** No mobile os filtros ficam em um drawer (Sheet). */
@@ -12,7 +12,7 @@ async function closeFilters(page: Page) {
 const cards = (page: Page) => page.locator('#catalogo [data-testid=nft-card]')
 
 test.describe('1. Catálogo: busca, filtros, ordenação, paginação e histórico', () => {
-  test.beforeEach(async ({ page }) => useScenario(page))
+  test.beforeEach(async ({ page }) => useMockConfig(page))
 
   test('busca reflete na URL e na API', async ({ page }) => {
     await page.goto('/')
@@ -96,21 +96,5 @@ test.describe('1. Catálogo: busca, filtros, ordenação, paginação e históri
     await expect(page.getByRole('heading', { name: 'Nenhum NFT encontrado' })).toBeVisible()
     await page.getByRole('status').getByRole('button', { name: 'Limpar filtros' }).click()
     await expect(cards(page)).toHaveCount(9)
-  })
-
-  test('respostas fora de ordem não sobrescrevem o resultado mais recente', async ({ page }) => {
-    await page.goto('/')
-    await expect(cards(page)).toHaveCount(9)
-    const firstOfAll = await cards(page).first().getByRole('heading').textContent()
-    // a partir daqui, a 1ª consulta responde em 1.8s, a 2ª em 0.6s e a 3ª em 0.2s
-    await page.evaluate(() => (window.__kurio as unknown as { setConfig: (c: object) => Promise<unknown> }).setConfig({ scenario: 'out-of-order' }))
-    const tabs = page.getByRole('tablist', { name: 'Seleção do catálogo' })
-    await tabs.getByRole('tab', { name: 'Novos lançamentos' }).click()
-    await tabs.getByRole('tab', { name: 'Em alta' }).click()
-    await tabs.getByRole('tab', { name: 'Todos os NFTs' }).click()
-    await page.waitForTimeout(2300) // todas as respostas (inclusive as obsoletas) já chegaram
-    await expect(tabs.getByRole('tab', { name: 'Todos os NFTs' })).toHaveAttribute('aria-selected', 'true')
-    await expect(cards(page)).toHaveCount(9)
-    await expect(cards(page).first().getByRole('heading')).toHaveText(firstOfAll!)
   })
 })

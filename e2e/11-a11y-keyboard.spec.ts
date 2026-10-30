@@ -1,7 +1,7 @@
-import { addToCartFromDetail, expect, isMobile, login, test, useScenario } from './fixtures'
+import { addToCartFromDetail, expect, isMobile, login, test, useMockConfig } from './fixtures'
 
 test.describe('11. Teclado, foco em diálogos e validação de formulários', () => {
-  test.beforeEach(async ({ page }) => useScenario(page))
+  test.beforeEach(async ({ page }) => useMockConfig(page))
 
   test('link de pular conteúdo e navegação por teclado até o detalhe', async ({ page }) => {
     await page.goto('/')

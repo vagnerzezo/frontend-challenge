@@ -6,7 +6,6 @@ export const USERS = {
 } as const
 
 type MockConfig = {
-  scenario?: string
   latency?: 'none' | 'fast' | 'slow' | 'variable'
   offline?: boolean
   serverDown?: boolean
@@ -14,8 +13,8 @@ type MockConfig = {
 }
 
 /** Configura a simulação antes do primeiro carregamento (persistida após refresh). */
-export async function useScenario(page: Page, config: MockConfig = {}) {
-  const cfg = { scenario: 'default', latency: 'none', offline: false, serverDown: false, orderResolutionMs: 1500, ...config }
+export async function useMockConfig(page: Page, config: MockConfig = {}) {
+  const cfg = { latency: 'none', offline: false, serverDown: false, orderResolutionMs: 1500, ...config }
   await page.addInitScript((c) => {
     if (!localStorage.getItem('kurio.mock.config')) localStorage.setItem('kurio.mock.config', JSON.stringify(c))
   }, cfg)

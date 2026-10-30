@@ -28,7 +28,6 @@ export interface OrderRecord extends Order {
   requestHash: string
   quoteId: string
   resolveAt: number
-  outcome: 'confirmed' | 'rejected'
 }
 
 export interface DbState {

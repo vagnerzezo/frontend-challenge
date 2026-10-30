@@ -1,9 +1,9 @@
-import { expect, login, test, useScenario } from './fixtures'
+import { expect, login, test, useMockConfig } from './fixtures'
 import path from 'node:path'
 
 test.describe('8. Perfil, avatar, senha e carteiras', () => {
   test.beforeEach(async ({ page }) => {
-    await useScenario(page)
+    await useMockConfig(page)
     await login(page)
   })
 

@@ -9,9 +9,9 @@ src/
   api/                  contratos tipados, schemas zod, Axios, endpoints, hooks TanStack Query
   realtime/             cliente Socket.IO (deduplicação, versão, reconciliação)
   session/              store de sessão (useSyncExternalStore) e id do carrinho do visitante
-  features/             telas: home, nft, cart, checkout, order, auth, profile, devtools
+  features/             telas: home, nft, cart, checkout, order, auth, profile
   components/           layout, NFT, formulários, feedback, shadcn/ui adaptado
-  mocks/                API simulada: fixtures, banco, domínio, handlers REST, Socket.IO, cenários
+  mocks/                API simulada: fixtures, banco, domínio, handlers REST, Socket.IO
 e2e/                    Playwright (12 grupos + regressão visual)
 lighthouse/, scripts/   configuração e script da auditoria
 ```
@@ -50,7 +50,7 @@ Base `/api`. Erros seguem `{ error: { code, message, fields?, details? } }`. Val
 - Mesma chave com corpo diferente retorna 409 `IDEMPOTENCY_CONFLICT`.
 - Antes de criar o pedido, o servidor recalcula a cotação. Qualquer diferença de preço, disponibilidade, cupom ou taxa, ou cotação expirada (5 min), retorna `QUOTE_STALE` com a nova cotação.
 
-**Endpoints de controle** (`/__mock/*`, usados apenas pelo painel de cenários e pelos testes): `state`, `config`, `reset`, `nfts/:id` (PATCH preço/estoque), `events/replay`, `socket/drop`, `sessions/expire`, `wallet-sessions/disconnect`, `orders/:id/resolve`.
+**Endpoints de controle** (`/__mock/*`, usados apenas pelos testes e pelo console via `window.__kurio`): `state`, `config`, `reset`, `nfts/:id` (PATCH preço/estoque), `events/replay`, `socket/drop`, `sessions/expire`, `wallet-sessions/disconnect`, `orders/:id/resolve`.
 
 ## Eventos Socket.IO
 
@@ -131,7 +131,7 @@ Máquina de estados (`use-checkout.ts`): `idle → reviewing → connecting → 
 
 - **Persistência:** o banco simulado fica em `localStorage` (`kurio.mock.db.v1`) e a configuração em `kurio.mock.config`. O reset regrava o seed.
 - **Fixtures:** 48 NFTs determinísticos, 9 coleções e 3 redes, mais 2 usuários, carteiras e cupons. Os 9 NFTs do Figma mantêm nomes e preços.
-- **Determinismo:** IDs sequenciais, latência por hash da URL, cenários com contadores reiniciados no reset e na troca de cenário.
+- **Determinismo:** IDs sequenciais, latência por hash da URL.
 - **Pedidos pendentes:** resolvidos por timer, retomados no boot e resolvidos sob demanda no `GET`, se vencidos.
 - **Build de demonstração:** os mocks entram no build quando `VITE_ENABLE_MOCKS=true`, carregados em chunk separado.
 
@@ -154,7 +154,6 @@ Máquina de estados (`use-checkout.ts`): `idle → reviewing → connecting → 
 - **Fora do escopo:** Criadores, Aprenda, Atividade, Ofertas, Arquivos baixados, Suporte, Diário, login social, recuperação de senha e newsletter mostram o aviso "não disponível nesta demonstração" e nunca simulam sucesso. Os links de redes sociais são externos.
 - **Toasts:** aparecem na parte inferior, acima da navegação mobile, para não cobrir o botão de favorito do topo.
 - **Validação:** formulários validam no envio e revalidam ao digitar. Validar no *blur* re-renderizava a tela entre o *mousedown* e o *mouseup* do botão de envio e perdia o clique.
-- **Painel de cenários:** botão "Cenários" visível apenas com mocks ativos; fica oculto nas capturas de regressão visual.
 
 ## Limitações conhecidas
 

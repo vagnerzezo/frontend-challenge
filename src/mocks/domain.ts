@@ -50,11 +50,9 @@ const SORTERS: Record<CatalogSort, (a: Nft, b: Nft) => number> = {
 export function listNfts(params: NftListParams): NftListResponse {
   const all = db.state.nftOrder.map((id) => db.state.nfts[id])
   const search = params.q?.trim().toLowerCase()
-  const isEmptyScenario = getConfig().scenario === 'empty-catalog'
 
   // filtros que não são coleção nem rede
   const matchesBaseFilters = (nft: Nft) => {
-    if (isEmptyScenario) return false
     if (search && !`${nft.name} ${nft.collectionName} ${nft.tokenId}`.toLowerCase().includes(search)) return false
     if (params.tab === 'novos' && Date.parse(nft.createdAt) < Date.UTC(2026, 8, 1)) return false
     if (params.tab === 'em-alta' && !(nft.rare || nft.reviewsCount >= 19)) return false
@@ -348,27 +346,14 @@ export function buildQuote(ownerKey: string, items: CartItemInput[], couponCode:
   }
   db.state.quotes[quote.id] = { ...quote, ownerKey }
   db.save()
-
-  // cenário: o preço do 1º item sobe 2s depois da cotação do checkout (só uma vez)
-  if (getConfig().scenario === 'price-change-on-checkout' && ownerKey.startsWith('user:')) {
-    const first = lines[0]
-    const key = `price-change:${first.nftId}`
-    if (!scheduledPriceChanges.has(key)) {
-      scheduledPriceChanges.add(key)
-      const newPrice = new Big(first.unitPrice).plus('0.1').toFixed(2)
-      setTimeout(() => updateNft(first.nftId, { price: newPrice }), 2000)
-    }
-  }
   return quote
 }
-
-const scheduledPriceChanges = new Set<string>()
 
 // Pedidos
 
 // tira os campos internos do pedido antes de mandar para o cliente
 export function publicOrder(order: OrderRecord): Order {
-  const { userId: _userId, requestHash: _requestHash, quoteId: _quoteId, resolveAt: _resolveAt, outcome: _outcome, ...rest } = order
+  const { userId: _userId, requestHash: _requestHash, quoteId: _quoteId, resolveAt: _resolveAt, ...rest } = order
   return rest
 }
 
@@ -401,27 +386,18 @@ export function resolveOrder(orderId: string) {
   const order = db.state.orders[orderId]
   if (!order || order.status !== 'pending') return
 
-  let outcome = order.outcome
-  let reason: string | null = outcome === 'rejected' ? 'Pagamento recusado pela carteira/rede.' : null
-
   // se algum item esgotou enquanto o pagamento estava pendente, o pedido é recusado
-  if (outcome === 'confirmed') {
-    const soldOutItem = order.items.find((item) => {
-      const edition = db.state.nfts[item.nftId]?.editions.find((ed) => ed.id === item.editionId)
-      return !edition || edition.available < item.quantity
-    })
-    if (soldOutItem) {
-      outcome = 'rejected'
-      reason = `${soldOutItem.name} (${soldOutItem.editionLabel}) esgotou antes da confirmação.`
-    }
-  }
+  const soldOutItem = order.items.find((item) => {
+    const edition = db.state.nfts[item.nftId]?.editions.find((ed) => ed.id === item.editionId)
+    return !edition || edition.available < item.quantity
+  })
 
-  order.status = outcome
+  order.status = soldOutItem ? 'rejected' : 'confirmed'
   order.version += 1
   order.updatedAt = new Date().toISOString()
-  order.failureReason = reason
+  order.failureReason = soldOutItem ? `${soldOutItem.name} (${soldOutItem.editionLabel}) esgotou antes da confirmação.` : null
 
-  if (outcome === 'confirmed') {
+  if (order.status === 'confirmed') {
     order.transactionHash = fakeTransactionHash(order.id + order.idempotencyKey)
     order.explorerUrl = `https://etherscan.io/tx/${order.transactionHash}`
 
@@ -465,7 +441,6 @@ export function createOrderRecord(input: {
   quote: Quote
   wallet: Order['wallet']
 }): OrderRecord {
-  const config = getConfig()
   const now = Date.now()
   const order: OrderRecord = {
     id: db.nextId('ord'),
@@ -487,8 +462,7 @@ export function createOrderRecord(input: {
     userId: input.userId,
     requestHash: input.requestHash,
     quoteId: input.quote.id,
-    resolveAt: now + config.orderResolutionMs,
-    outcome: config.scenario === 'payment-declined' ? 'rejected' : 'confirmed',
+    resolveAt: now + getConfig().orderResolutionMs,
   }
   db.state.orders[order.id] = order
   db.state.idempotency[`${input.userId}:${input.key}`] = order.id
@@ -500,5 +474,4 @@ export function createOrderRecord(input: {
 export function resetDomainTimers() {
   for (const timer of orderTimers.values()) clearTimeout(timer)
   orderTimers.clear()
-  scheduledPriceChanges.clear()
 }

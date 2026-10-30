@@ -2,7 +2,7 @@ import { setupWorker } from 'msw/browser'
 import { handlers } from './handlers'
 import { db } from './db'
 import { resumePendingOrders } from './domain'
-import { getConfig, SCENARIOS, LATENCY_PROFILES } from './config'
+import { getConfig, LATENCY_PROFILES } from './config'
 
 // Liga a API simulada (MSW). Só é usado quando VITE_ENABLE_MOCKS=true.
 export async function startMocks() {
@@ -15,7 +15,7 @@ export async function startMocks() {
   })
   resumePendingOrders()
 
-  // funções usadas pelos testes e pelo painel de cenários (chamam as rotas /__mock)
+  // funções usadas pelos testes (chamam as rotas /__mock)
   const callMock = async (path: string, method = 'POST', body?: unknown) => {
     const response = await fetch(`/__mock${path}`, {
       method,
@@ -25,7 +25,6 @@ export async function startMocks() {
     return response.json()
   }
   window.__kurio = {
-    scenarios: SCENARIOS,
     latencies: LATENCY_PROFILES,
     config: () => getConfig(),
     state: () => callMock('/state', 'GET'),
@@ -43,7 +42,6 @@ export async function startMocks() {
 declare global {
   interface Window {
     __kurio?: {
-      scenarios: typeof SCENARIOS
       latencies: typeof LATENCY_PROFILES
       config: () => ReturnType<typeof getConfig>
       state: () => Promise<unknown>

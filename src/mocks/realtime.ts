@@ -26,7 +26,7 @@ const connections = new Map<number, Connection>()
 let lastConnectionId = 0
 // quando true, recusa novas conexões (simula o servidor fora do ar)
 let refuseConnections = false
-// histórico para os cenários de duplicata/evento antigo
+// histórico de eventos, usado para reenviar duplicatas e eventos antigos nos testes
 const history: Array<NftUpdatedEvent | OrderUpdatedEvent> = []
 
 // o MSW remove o prefixo /socket.io/ do caminho ao comparar conexões
@@ -88,7 +88,7 @@ export function sendOrderUpdated(orderId: string) {
   const order = db.state.orders[orderId]
   if (!order) return
   // tira os campos internos antes de mandar para o cliente
-  const { userId, requestHash: _requestHash, quoteId: _quoteId, resolveAt: _resolveAt, outcome: _outcome, ...publicOrder } = order
+  const { userId, requestHash: _requestHash, quoteId: _quoteId, resolveAt: _resolveAt, ...publicOrder } = order
   const event: OrderUpdatedEvent = {
     eventId: buildEventId('order.updated', order.id, order.version),
     type: 'order.updated',

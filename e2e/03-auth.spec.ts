@@ -1,4 +1,4 @@
-import { expect, isMobile, login, mocks, test, USERS, useScenario } from './fixtures'
+import { expect, isMobile, login, mocks, test, USERS, useMockConfig } from './fixtures'
 import type { Page } from '@playwright/test'
 
 async function logout(page: Page) {
@@ -8,7 +8,7 @@ async function logout(page: Page) {
 }
 
 test.describe('3. Cadastro, login, expiração, logout e troca de usuário', () => {
-  test.beforeEach(async ({ page }) => useScenario(page))
+  test.beforeEach(async ({ page }) => useMockConfig(page))
 
   test('cadastro com validação, conflito e sucesso', async ({ page }) => {
     await page.goto('/cadastro')

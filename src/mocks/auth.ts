@@ -1,10 +1,8 @@
 import type { Session, User } from '@/api/contracts'
-import { getConfig } from './config'
 import { db, type UserRecord } from './db'
 import { fail } from './http'
 
 const SESSION_DURATION_MS = 24 * 60 * 60 * 1000
-const SHORT_SESSION_DURATION_MS = 45 * 1000
 
 export function toUser(user: UserRecord): User {
   return { id: user.id, username: user.username, email: user.email, displayName: user.displayName, avatarUrl: user.avatarUrl }
@@ -50,8 +48,7 @@ export function cartOwnerKey(request: Request): string {
 
 export function createSession(userId: string): Session {
   const token = crypto.randomUUID()
-  const duration = getConfig().scenario === 'short-session' ? SHORT_SESSION_DURATION_MS : SESSION_DURATION_MS
-  const expiresAt = Date.now() + duration
+  const expiresAt = Date.now() + SESSION_DURATION_MS
   db.state.sessions[token] = { userId, expiresAt }
   db.save()
   return { token, user: toUser(db.state.users[userId]), expiresAt: new Date(expiresAt).toISOString() }

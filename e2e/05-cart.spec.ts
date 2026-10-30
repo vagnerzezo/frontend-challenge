@@ -1,4 +1,4 @@
-import { addToCartFromDetail, expect, isMobile, login, test, USERS, useScenario } from './fixtures'
+import { addToCartFromDetail, expect, isMobile, login, test, USERS, useMockConfig } from './fixtures'
 import type { Page } from '@playwright/test'
 
 const summary = (page: Page) => page.getByTestId('order-summary')
@@ -6,7 +6,7 @@ const line = (page: Page, name: string) =>
   page.getByTestId(/^cart-line/).filter({ visible: true }).filter({ hasText: name })
 
 test.describe('5. Carrinho', () => {
-  test.beforeEach(async ({ page }) => useScenario(page))
+  test.beforeEach(async ({ page }) => useMockConfig(page))
 
   test('quantidades, remoção e resumo coerente com a API', async ({ page }) => {
     await addToCartFromDetail(page, 'emerald-ape-042', 1)

@@ -1,8 +1,8 @@
-import { addToCartFromDetail, expect, isMobile, login, test, useScenario, waitForSocket } from './fixtures'
+import { addToCartFromDetail, expect, isMobile, login, test, useMockConfig, waitForSocket } from './fixtures'
 
 test.describe('6. Compra completa', () => {
   test('do catálogo ao recibo confirmado', async ({ page }) => {
-    await useScenario(page)
+    await useMockConfig(page)
     await page.goto('/')
     // catálogo -> detalhe
     await page.getByRole('link', { name: 'Emerald Ape #042' }).first().click()
@@ -48,7 +48,7 @@ test.describe('6. Compra completa', () => {
   })
 
   test('recibo reproduz o snapshot mesmo após mudança de preço no catálogo', async ({ page }) => {
-    await useScenario(page)
+    await useMockConfig(page)
     await login(page)
     await addToCartFromDetail(page, 'sage-nomad-009', 1)
     await page.getByRole('button', { name: 'Conectar e finalizar' }).click()

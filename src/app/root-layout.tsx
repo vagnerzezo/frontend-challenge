@@ -1,5 +1,4 @@
 import { Outlet, useRouterState } from '@tanstack/react-router'
-import { lazy, Suspense } from 'react'
 import { Toaster } from '@/components/ui/sonner'
 import { SiteHeader } from '@/components/layout/site-header'
 import { SiteFooter } from '@/components/layout/site-footer'
@@ -7,8 +6,6 @@ import { MobileNav } from '@/components/layout/mobile-nav'
 import { Announcer } from '@/components/layout/announcer'
 import { RealtimeBanner } from '@/components/layout/realtime-banner'
 import { SessionManager } from './session-manager'
-
-const ScenarioPanel = import.meta.env.VITE_ENABLE_MOCKS === 'true' ? lazy(() => import('@/features/devtools/scenario-panel')) : null
 
 // no mobile, login e cadastro ocupam a tela inteira
 const FULLSCREEN_PAGES = ['/login', '/cadastro']
@@ -33,11 +30,6 @@ export function RootLayout() {
       <SessionManager />
       <Announcer />
       <Toaster position="bottom-center" closeButton mobileOffset={{ bottom: 176 }} />
-      {ScenarioPanel && (
-        <Suspense fallback={null}>
-          <ScenarioPanel />
-        </Suspense>
-      )}
     </>
   )
 }

@@ -1,7 +1,7 @@
-import { expect, isMobile, test, useScenario } from './fixtures'
+import { expect, isMobile, test, useMockConfig } from './fixtures'
 
 test.describe('2. Detalhe: acesso direto e recurso inexistente', () => {
-  test.beforeEach(async ({ page }) => useScenario(page))
+  test.beforeEach(async ({ page }) => useMockConfig(page))
 
   test('acesso direto ao detalhe carrega dados da API', async ({ page }) => {
     const res = page.waitForResponse((r) => r.url().endsWith('/api/nfts/emerald-ape-042'))

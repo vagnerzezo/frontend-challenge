@@ -1,8 +1,8 @@
-import { addToCartFromDetail, expect, login, mocks, test, useScenario, waitForSocket } from './fixtures'
+import { addToCartFromDetail, expect, login, mocks, test, useMockConfig, waitForSocket } from './fixtures'
 
 test.describe('10. Eventos duplicados/antigos, desconexão e retomada de pedido pendente', () => {
   test('duplicatas e eventos antigos não regridem o estado nem reaplicam efeitos', async ({ page }) => {
-    await useScenario(page)
+    await useMockConfig(page)
     await addToCartFromDetail(page, 'golden-signal-160', 1)
     await waitForSocket(page)
     const m = mocks(page)
@@ -23,7 +23,7 @@ test.describe('10. Eventos duplicados/antigos, desconexão e retomada de pedido 
   })
 
   test('reconexão reconcilia com a API eventos perdidos durante a queda', async ({ page }) => {
-    await useScenario(page)
+    await useMockConfig(page)
     await page.goto('/nft/golden-beat-207')
     await waitForSocket(page)
     await mocks(page).dropSocket(3000)
@@ -35,7 +35,7 @@ test.describe('10. Eventos duplicados/antigos, desconexão e retomada de pedido 
   })
 
   test('pedido pendente é retomado após refresh e após reconexão, sem nova compra', async ({ page }) => {
-    await useScenario(page, { orderResolutionMs: 4000 })
+    await useMockConfig(page, { orderResolutionMs: 4000 })
     await login(page)
     await addToCartFromDetail(page, 'emerald-ape-042', 1)
     await page.goto('/pagamento')
@@ -61,7 +61,7 @@ test.describe('10. Eventos duplicados/antigos, desconexão e retomada de pedido 
   test('eventos de pedido de outro usuário não chegam à sessão atual', async ({ browser }) => {
     const ctxA = await browser.newContext()
     const a = await ctxA.newPage()
-    await useScenario(a)
+    await useMockConfig(a)
     await login(a)
     await addToCartFromDetail(a, 'sage-nomad-009', 1)
     await a.goto('/pagamento')
