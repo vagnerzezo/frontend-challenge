@@ -1,0 +1,12 @@
+{
+  "baseUrl": "http://localhost:4174",
+  "runs": 3,
+  "pages": [
+    { "name": "inicio", "path": "/" },
+    { "name": "detalhe", "path": "/nft/emerald-ape-042" }
+  ],
+  "profiles": ["mobile", "desktop"],
+  "categories": ["performance", "accessibility", "best-practices", "seo"],
+  "targets": { "performance": 90, "accessibility": 95, "best-practices": 95, "seo": 90 },
+  "notes": "Build otimizado (vite build) com o cenário padrão dos mocks (VITE_ENABLE_MOCKS=true, latência 'fast'). Perfis: mobile = preset padrão do Lighthouse (Moto G Power, 4x CPU, Slow 4G simulado); desktop = preset desktop."
+}

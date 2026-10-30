@@ -1,0 +1,77 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Paleta extraída do Figma "Frontend Challenge" (Kurio). */
+@theme {
+  --font-mono: 'Roboto Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: var(--font-mono);
+
+  --color-ink: #120d0b;
+  --color-surface: #1f1714;
+  --color-surface-2: #2a201b;
+  --color-band: #2f2015;
+  --color-line: #3a2b23;
+  --color-cream: #f3ebe1;
+  --color-muted: #c9a07c;
+  --color-subtle: #a88a72;
+  --color-accent: #cd8250;
+  --color-accent-strong: #e0965f;
+  --color-accent-ink: #1a110c;
+  --color-danger: #f0846b;
+  --color-success: #8fcf9a;
+
+  --radius-card: 12px;
+
+  /* tokens shadcn/ui mapeados para a identidade Kurio */
+  --color-background: var(--color-ink);
+  --color-foreground: var(--color-cream);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-cream);
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-cream);
+  --color-primary: var(--color-accent);
+  --color-primary-foreground: var(--color-accent-ink);
+  --color-secondary: var(--color-surface-2);
+  --color-secondary-foreground: var(--color-cream);
+  --color-muted-foreground: var(--color-muted);
+  --color-accent-foreground: var(--color-cream);
+  --color-destructive: var(--color-danger);
+  --color-border: var(--color-line);
+  --color-input: var(--color-line);
+  --color-ring: var(--color-accent);
+  --radius: 6px;
+
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+}
+
+@layer base {
+  html { color-scheme: dark; -webkit-text-size-adjust: 100%; }
+  body {
+    @apply bg-ink text-cream font-mono antialiased;
+    min-width: 320px;
+    overflow-x: hidden;
+  }
+  * { border-color: var(--color-line); }
+  :focus-visible { outline: 2px solid var(--color-accent-strong); outline-offset: 2px; }
+  ::selection { background: var(--color-accent); color: var(--color-accent-ink); }
+}
+
+@layer components {
+  .skeleton-shimmer {
+    background-image: linear-gradient(90deg, var(--color-surface-2) 0%, #3b2d26 50%, var(--color-surface-2) 100%);
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+  .container-k { @apply mx-auto w-full max-w-[1200px] px-4 md:px-8; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer { animation: none; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}

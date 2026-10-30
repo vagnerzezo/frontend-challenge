@@ -1,0 +1,215 @@
+{
+  "env": {
+    "date": "2026-10-29T23:04:34.391Z",
+    "lighthouse": "13.6.0",
+    "chrome": "1248",
+    "node": "v22.23.1",
+    "os": "Darwin 27.2.0 arm64",
+    "cpu": "Apple M4",
+    "conditions": "Build otimizado (vite build) com o cenário padrão dos mocks (VITE_ENABLE_MOCKS=true, latência 'fast'). Perfis: mobile = preset padrão do Lighthouse (Moto G Power, 4x CPU, Slow 4G simulado); desktop = preset desktop."
+  },
+  "targets": {
+    "performance": 90,
+    "accessibility": 95,
+    "best-practices": 95,
+    "seo": 90
+  },
+  "results": [
+    {
+      "page": "inicio",
+      "path": "/",
+      "profile": "mobile",
+      "median": {
+        "performance": 96,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100,
+        "lcpMs": 2678,
+        "cls": 0.034,
+        "tbtMs": 73
+      },
+      "runs": [
+        {
+          "scores": {
+            "performance": 96,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 2677.83025,
+          "cls": 0.03390966576065694,
+          "tbt": 73
+        },
+        {
+          "scores": {
+            "performance": 96,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 2676.5602499999995,
+          "cls": 0.03390966576065694,
+          "tbt": 72
+        },
+        {
+          "scores": {
+            "performance": 96,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 2685.1192499999997,
+          "cls": 0.03390966576065694,
+          "tbt": 82
+        }
+      ]
+    },
+    {
+      "page": "inicio",
+      "path": "/",
+      "profile": "desktop",
+      "median": {
+        "performance": 100,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100,
+        "lcpMs": 668,
+        "cls": 0.001,
+        "tbtMs": 0
+      },
+      "runs": [
+        {
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 667.7892499999998,
+          "cls": 0.0010425613635700317,
+          "tbt": 0
+        },
+        {
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 669.11875,
+          "cls": 0.0010425613635700317,
+          "tbt": 0
+        },
+        {
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 667.4010000000001,
+          "cls": 0.0010425613635700317,
+          "tbt": 0
+        }
+      ]
+    },
+    {
+      "page": "detalhe",
+      "path": "/nft/emerald-ape-042",
+      "profile": "mobile",
+      "median": {
+        "performance": 96,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100,
+        "lcpMs": 2713,
+        "cls": 0.039,
+        "tbtMs": 26
+      },
+      "runs": [
+        {
+          "scores": {
+            "performance": 96,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 2726.1941999999995,
+          "cls": 0.03888213851761847,
+          "tbt": 35
+        },
+        {
+          "scores": {
+            "performance": 97,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 2559.3115,
+          "cls": 0.03888213851761847,
+          "tbt": 26
+        },
+        {
+          "scores": {
+            "performance": 96,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 2713.1817,
+          "cls": 0.03888213851761847,
+          "tbt": 23
+        }
+      ]
+    },
+    {
+      "page": "detalhe",
+      "path": "/nft/emerald-ape-042",
+      "profile": "desktop",
+      "median": {
+        "performance": 100,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100,
+        "lcpMs": 675,
+        "cls": 0.011,
+        "tbtMs": 0
+      },
+      "runs": [
+        {
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 675.0217,
+          "cls": 0.01083057525610717,
+          "tbt": 0
+        },
+        {
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 674.7475,
+          "cls": 0.01083057525610717,
+          "tbt": 0
+        },
+        {
+          "scores": {
+            "performance": 100,
+            "accessibility": 100,
+            "best-practices": 100,
+            "seo": 100
+          },
+          "lcp": 674.6826,
+          "cls": 0.01083057525610717,
+          "tbt": 0
+        }
+      ]
+    }
+  ]
+}
