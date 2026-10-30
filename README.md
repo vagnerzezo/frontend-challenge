@@ -53,55 +53,34 @@ Definidas em `.env` (versionado, valores fictícios) — copie para `.env.local`
 
 Cupons: `KURIO10` (10%), `GENESIS5` (5%), `EXPIRADO` (expirado). Qualquer outro código é inválido.
 
-## Cenários da simulação
+## Simulação
 
-O botão **"Cenários"** (canto inferior esquerdo) abre o painel da simulação. Ele permite trocar cenário e condições de rede, disparar eventos e restaurar o estado inicial. As alterações persistem após refresh.
+Pelo console do navegador, `window.__kurio` dá acesso aos controles da API simulada: `setConfig`, `reset`, `updateNft`, `replayEvent`, `dropSocket`, `expireSessions` e `disconnectWallets`. As alterações persistem após refresh.
 
-Também é possível selecionar o cenário pela URL — `?scenario=<id>` — ou pelo console com `window.__kurio` (`setConfig`, `reset`, `updateNft`, `replayEvent`, `dropSocket`, `expireSessions`, `disconnectWallets`).
+Condições de rede (`setConfig`): latência `none`, `fast`, `slow` (2.5s) ou `variable` (100ms–2s, determinística por URL); `offline: true` (erro de rede); `serverDown: true` (HTTP 503).
 
-| Cenário (`id`) | Efeito |
-| --- | --- |
-| `default` | Catálogo completo; pagamento confirmado ~3s após o envio |
-| `empty-catalog` | Catálogo sem resultados |
-| `catalog-error` | Cada consulta ao catálogo falha 3× (HTTP 503) e depois se recupera |
-| `out-of-order` | Consultas do catálogo respondem em ordem inversa (1.8s, 0.6s, 0.2s) |
-| `favorites-error` | Inclusão/remoção de favoritos retorna HTTP 500 (rollback otimista) |
-| `short-session` | Sessão expira 45s após o login |
-| `price-change-on-checkout` | Preço do 1º item sobe +0.1 ETH 2s após a cotação do checkout |
-| `sold-out-on-checkout` | Edição do 1º item esgota ao criar o pedido |
-| `order-timeout` | Pedido é criado, mas a resposta chega após o timeout do cliente |
-| `payment-declined` | Pagamento recusado |
-| `wallet-reject` | Usuário recusa a conexão da carteira |
+**Reset:** `await window.__kurio.reset()` restaura integralmente o banco simulado (seed determinístico), a configuração e o estado do tempo real.
 
-Condições de rede (combináveis com qualquer cenário): latência `none`, `fast`, `slow` (2.5s) ou `variable` (100ms–2s, determinística por URL); **sem conexão** (erro de rede); **servidor indisponível** (HTTP 503).
-
-**Reset:** "Restaurar cenário padrão" no painel, ou `await window.__kurio.reset()`. O reset restaura integralmente o banco simulado (seed determinístico), a configuração e o estado do tempo real.
-
-### Reproduzindo os fluxos de falha
+### Reproduzindo fluxos pelo console
 
 | Fluxo | Passos |
 | --- | --- |
-| Preço alterado com carrinho aberto | Adicione um NFT, abra `/carrinho`, painel → "Alterar preço do 1º item" — aviso + resumo atualizado |
-| Cotação desatualizada no checkout | Cenário `price-change-on-checkout`, vá a `/pagamento` → "Confirmar compra" e aguarde 2s na revisão |
-| Edição esgotada | Cenário `sold-out-on-checkout` → confirmar a compra |
-| Timeout + idempotência | Cenário `order-timeout` → confirmar; após 10s o app reenvia com a mesma chave e recupera o mesmo pedido |
-| Pagamento recusado | Cenário `payment-declined` → confirmar; os itens permanecem no carrinho |
-| Pedido pendente + refresh/queda | Confirme a compra e recarregue durante "Pagamento pendente", ou use "Derrubar Socket.IO por 5s" |
-| Eventos duplicados/antigos | Altere um preço duas vezes e use "Reenviar último evento" / "Reenviar evento antigo" |
-| Sessão expirada | Painel → "Expirar sessão agora" e navegue para uma área privada |
-| Falha e nova tentativa | Cenário `catalog-error` ou "Sem conexão" → "Tentar novamente" |
-| Skeletons | Latência "Lenta (2.5s)" |
+| Preço alterado com carrinho aberto | Adicione um NFT, abra `/carrinho` e rode `window.__kurio.updateNft('<id>', { price: '1.50' })` — aviso + resumo atualizado |
+| Pedido pendente + refresh/queda | Confirme a compra e recarregue durante "Pagamento pendente", ou rode `window.__kurio.dropSocket(5000)` |
+| Eventos duplicados/antigos | Altere um preço duas vezes e rode `window.__kurio.replayEvent('duplicate')` / `replayEvent('stale')` |
+| Sessão expirada | `window.__kurio.expireSessions()` e navegue para uma área privada |
+| Falha e nova tentativa | `window.__kurio.setConfig({ offline: true })`, depois `{ offline: false }` → "Tentar novamente" |
+| Skeletons | `window.__kurio.setConfig({ latency: 'slow' })` |
 
 ## Testes
 
 ```bash
-pnpm test:e2e            # 100 testes (50 por viewport)
+pnpm test:e2e            # 84 testes (42 por viewport)
 pnpm test:e2e:report     # relatório HTML; traces de falhas em test-results/
 ```
 
-- Arquivos `e2e/01..12-*.spec.ts` cobrem os 12 itens do enunciado; `e2e/visual.spec.ts` faz regressão visual de início, detalhe, carrinho e pagamento (baselines em `e2e/__screenshots__/`).
+- Arquivos `e2e/01..12-*.spec.ts` cobrem os itens do enunciado (os fluxos de falha que dependiam dos cenários da simulação — pagamento recusado, timeout do pedido, carteira recusada, cotação desatualizada, edição esgotada no pedido, erro de favoritos, catálogo com erro e respostas fora de ordem — não são mais testados); `e2e/visual.spec.ts` faz regressão visual de início, detalhe, carrinho e pagamento (baselines em `e2e/__screenshots__/`).
 - Cada teste roda em um `BrowserContext` novo, com `localStorage` vazio e seed determinístico, e latência configurada antes do primeiro carregamento.
-- O relógio é controlado com `page.clock` nos cenários sensíveis a tempo (timeout do pedido, mudança de preço agendada).
 - Eventos em tempo real passam pelo `socket.io-client`; REST passa pelos handlers MSW.
 
 ## Lighthouse
@@ -121,4 +100,5 @@ Configuração versionada em `lighthouse/config.json`. Os relatórios HTML/JSON 
 ## Assets
 
 As imagens de NFT em `public/nfts/` são **provisórias**: foram recortadas das capturas do layout. Para usar os assets originais, exporte do Figma e substitua os arquivos mantendo os mesmos nomes: `emerald-ape.webp`, `sage-nomad.webp`, `ivory-baron.webp` e `golden-beat.webp` (480×480). Depois rode `pnpm test:e2e:update` para atualizar as baselines visuais.
+# frontend-challenge
 # frontend-challenge
