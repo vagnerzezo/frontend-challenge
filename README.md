@@ -102,3 +102,4 @@ Configuração versionada em `lighthouse/config.json`. Os relatórios HTML/JSON 
 As imagens de NFT em `public/nfts/` são **provisórias**: foram recortadas das capturas do layout. Para usar os assets originais, exporte do Figma e substitua os arquivos mantendo os mesmos nomes: `emerald-ape.webp`, `sage-nomad.webp`, `ivory-baron.webp` e `golden-beat.webp` (480×480). Depois rode `pnpm test:e2e:update` para atualizar as baselines visuais.
 # frontend-challenge
 # frontend-challenge
+# frontend-challenge
